@@ -2,11 +2,12 @@ const express = require("express");
 const { body, validationResult } = require("express-validator");
 const { multihash } = require("is-ipfs");
 const morgan = require("morgan");
+const multer = require("multer");
 
 const { addArtwork, createCertificate } = require("./chain");
-const { pinJsonString } = require("./ipfs");
+const { pinJsonString, pinFile } = require("./ipfs");
 
-const { APP_NAME, SVC_PORT } = require("./config");
+const { APP_NAME, FILE_STORE, SVC_PORT } = require("./config");
 
 main().catch(console.error);
 
@@ -15,6 +16,8 @@ async function main() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(morgan("tiny"));
+
+  const files = multer({dest: FILE_STORE});
 
   const isValidIpfsUrl = (url) => {
     const match = /ipfs:\/\/ipfs\/(.*)/.exec(url);
@@ -40,6 +43,21 @@ async function main() {
     res.status(400).json({ errors: errArr });
     return false;
   };
+
+  app.post("/file", files.single("file"), async (req, res) => {
+    if (!req.file || !req.file.path) {
+      res.status(400).json({ errors: "File not found." })
+      return;
+    }
+
+    try {
+      const cid = await pinFile(req.file.path);
+      res.json({ id: cid });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ errors: `${err}` });
+    }
+  });
 
   app.post(
     "/artwork-metadata",
