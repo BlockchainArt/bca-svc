@@ -11,8 +11,8 @@ module.exports = {
 
     const keyring = new Keyring({ type: "sr25519", ss58Format: 2 });
     const key = keyring.createFromUri(KSM_KEY);
-    const galleryAddress = encodeDerivedAddress(key.address, galleryId);
-    const artistAddress = encodeDerivedAddress(galleryAddress, artistId);
+    const galleryAddress = encodeDerivedAddress(key.address, galleryId, 2);
+    const artistAddress = encodeDerivedAddress(galleryAddress, artistId, 2);
     const artistAddressHex = u8aToHex(artistAddress);
     const collectionId = `${artistAddressHex.slice(2, 10)}${artistAddressHex.slice(-8)}-${symbol}`;
 
@@ -76,7 +76,7 @@ module.exports = {
 
     const keyring = new Keyring({ type: "sr25519", ss58Format: 2 });
     const key = keyring.createFromUri(KSM_KEY);
-    const galleryAddress = encodeDerivedAddress(key.address, galleryId);
+    const galleryAddress = encodeDerivedAddress(key.address, galleryId, 2);
 
     const api = await ApiPromise.create({ provider: new WsProvider(KSM_URL) });
     const mintCall = api.tx.system.remark(mintRmrk);
@@ -109,7 +109,7 @@ module.exports = {
     });
 
     const certificateId = `${mintedBlockNumber}-${collection}-${name}-${sn}`;
-    const collectorAddress = encodeDerivedAddress(galleryAddress, collectorId);
+    const collectorAddress = encodeDerivedAddress(galleryAddress, collectorId, 2);
     const sendRmrk = `RMRK::SEND::1.0.0::${certificateId}::${collectorAddress}`;
 
     const sendCall = api.tx.system.remark(sendRmrk);
