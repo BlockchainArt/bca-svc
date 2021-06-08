@@ -32,13 +32,13 @@ async function main() {
   const validateRequest = (req, res) => {
     const errors = validationResult(req);
     if (errors.isEmpty()) {
-      return false;
+      return true;
     }
 
     const errArr = errors.array();
     console.error(errArr);
     res.status(400).json({ errors: errArr });
-    return true;
+    return false;
   };
 
   app.post(
@@ -48,7 +48,7 @@ async function main() {
     body("numAp").isInt(),
     body("url").custom(isValidIpfsUrl),
     async (req, res) => {
-      if (validateRequest(req, res)) {
+      if (!validateRequest(req, res)) {
         return;
       }
 
@@ -90,7 +90,7 @@ async function main() {
     body("url").custom(isValidIpfsUrl),
     body("type").isMimeType(),
     async (req, res) => {
-      if (validateRequest(req, res)) {
+      if (!validateRequest(req, res)) {
         return;
       }
 
@@ -113,7 +113,7 @@ async function main() {
     body("num").isInt(),
     body("ap").toBoolean(),
     async (req, res) => {
-      if (validateRequest(req, res)) {
+      if (!validateRequest(req, res)) {
         return;
       }
 
@@ -154,7 +154,7 @@ async function main() {
     body("ap").toBoolean(),
     body("metadataUrl").custom(isValidIpfsUrl),
     async (req, res) => {
-      if (validateRequest(req, res)) {
+      if (!validateRequest(req, res)) {
         return;
       }
 
