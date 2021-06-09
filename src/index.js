@@ -4,7 +4,7 @@ const { multihash } = require("is-ipfs");
 const morgan = require("morgan");
 const multer = require("multer");
 
-const { addArtwork, createCertificate } = require("./chain");
+const { addArtwork, createCertificate, sendCertificate } = require("./chain");
 const { pinJsonString, pinFile } = require("./ipfs");
 
 const { APP_NAME, FILE_STORE, SVC_PORT } = require("./config");
@@ -17,7 +17,7 @@ async function main() {
   app.use(express.urlencoded({ extended: true }));
   app.use(morgan("tiny"));
 
-  const files = multer({dest: FILE_STORE});
+  const files = multer({ dest: FILE_STORE });
 
   const isValidIpfsUrl = (url) => {
     const match = /ipfs:\/\/ipfs\/(.*)/.exec(url);
@@ -46,7 +46,7 @@ async function main() {
 
   app.post("/file", files.single("file"), async (req, res) => {
     if (!req.file || !req.file.path) {
-      res.status(400).json({ errors: "File not found." })
+      res.status(400).json({ errors: "File not found." });
       return;
     }
 
@@ -188,6 +188,22 @@ async function main() {
       }
     }
   );
+
+  app.post("/transfer", async (req, res) => {
+    if (!validateRequest(req, res)) {
+      return;
+    }
+
+    const {galleryId, ownerId, destId, certificateId} = req.body;
+
+    try {
+      const { blockHash } = await sendCertificate(galleryId, ownerId, destId, certificateId);
+      res.json({blockHash});
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({errors: `${err}`});
+    }
+  });
 
   app.listen(SVC_PORT, () => {
     console.log(` >>> ✅ ${APP_NAME} is running on port ${SVC_PORT}...`);

@@ -136,4 +136,37 @@ module.exports = {
       });
     });
   },
+  sendCertificate: async (galleryId, ownerId, destId, certificateId) => {
+    const keyring = new Keyring({ type: "sr25519", ss58Format: 2 });
+    const key = keyring.createFromUri(KSM_KEY);
+    const galleryAddress = encodeDerivedAddress(key.address, galleryId, 2);
+    const collectorAddress = encodeDerivedAddress(galleryAddress, destId, 2);
+
+    const sendRmrk = `RMRK::SEND::1.0.0::${certificateId}::${collectorAddress}`;
+
+    const api = await ApiPromise.create({ provider: new WsProvider(KSM_URL) });
+    const sendCall = api.tx.system.remark(sendRmrk);
+    const asOwnerSend = api.tx.utility.asDerivative(ownerId, sendCall);
+    const asGallerySend = api.tx.utility.asDerivative(galleryId, asOwnerSend);
+    return new Promise(async (resolve, reject) => {
+      const unsub = await asGallerySend.signAndSend(key, ({ status, events, dispatchError }) => {
+        if (dispatchError) {
+          unsub();
+          if (dispatchError.isModule) {
+            const decoded = api.registry.findMetaError(dispatchError.asModule);
+            const { documentation, name, section } = decoded;
+
+            reject(`${section}.${name}: ${documentation.join(" ")}`);
+          } else {
+            reject(dispatchError.toString());
+          }
+        }
+
+        if (status.isFinalized) {
+          unsub();
+          resolve({ blockHash: status.asFinalized });
+        }
+      });
+    });
+  },
 };
