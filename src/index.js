@@ -4,7 +4,7 @@ const { multihash } = require("is-ipfs");
 const morgan = require("morgan");
 const multer = require("multer");
 
-const { addArtwork, createCertificate, sendCertificate } = require("./chain");
+const Chain = require("./chain");
 const { pinJsonString, pinFile } = require("./ipfs");
 
 const { APP_NAME, FILE_STORE, SVC_PORT } = require("./config");
@@ -18,6 +18,8 @@ async function main() {
   app.use(morgan("tiny"));
 
   const files = multer({ dest: FILE_STORE });
+
+  const chain = await new Chain().initialized;
 
   const isValidIpfsUrl = (url) => {
     const match = /ipfs:\/\/ipfs\/(.*)/.exec(url);
@@ -116,7 +118,7 @@ async function main() {
       const artwork = { name, max, symbol, metadataUrl, url, type };
 
       try {
-        const { id, blockHash } = await addArtwork(galleryId, artistId, artwork);
+        const { id, blockHash } = await chain.addArtwork(galleryId, artistId, artwork);
         res.json({ id, blockHash });
       } catch (err) {
         console.error(err);
@@ -180,7 +182,12 @@ async function main() {
       const certificate = { collection, num, ap, metadataUrl };
 
       try {
-        const { id, mintedBlock, sentBlock } = await createCertificate(galleryId, artistId, collectorId, certificate);
+        const { id, mintedBlock, sentBlock } = await chain.createCertificate(
+          galleryId,
+          artistId,
+          collectorId,
+          certificate
+        );
         res.json({ id, mintedBlock, sentBlock });
       } catch (err) {
         console.error(err);
@@ -194,14 +201,14 @@ async function main() {
       return;
     }
 
-    const {galleryId, ownerId, destId, certificateId} = req.body;
+    const { galleryId, ownerId, destId, certificateId } = req.body;
 
     try {
-      const { blockHash } = await sendCertificate(galleryId, ownerId, destId, certificateId);
-      res.json({blockHash});
+      const { blockHash } = await chain.sendCertificate(galleryId, ownerId, destId, certificateId);
+      res.json({ blockHash });
     } catch (err) {
       console.error(err);
-      res.status(500).json({errors: `${err}`});
+      res.status(500).json({ errors: `${err}` });
     }
   });
 
