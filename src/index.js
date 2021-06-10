@@ -121,7 +121,7 @@ async function main() {
         return;
       }
 
-      const { galleryId, artistId, collectorId, collection, num, ap, metadataUrl } = req.body;
+      const { galleryId, artistId, collectorId, collection, num, ap } = req.body;
       const name = `${collection}_${num.toString().padStart(16, "0")}`.replaceAll("-", "_");
 
       const metadata = {

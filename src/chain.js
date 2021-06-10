@@ -76,7 +76,7 @@ class Chain {
   async createCertificate(galleryId, artistId, collectorId, certificate) {
     const { collection, num, ap, metadataUrl } = certificate;
     const sn = num.toString().padStart(16, "0");
-    const name = `${collection}_${sn}`.replaceAll("-", "_");
+    const name = `${collection}_${sn}${ap ? "_ap" : ""}`.replaceAll("-", "_");
 
     const mintRmrk = `RMRK::MINTNFT::1.0.0::${encodeURIComponent(
       JSON.stringify({
@@ -144,7 +144,7 @@ class Chain {
 
         if (status.isInBlock) {
           unsub();
-          resolve({ id: certificateId, mintedBlockHash, sentBlock: status.asInBlock });
+          resolve({ id: certificateId, mintedBlock: mintedBlockHash, sentBlock: status.asInBlock });
         }
       });
     });
