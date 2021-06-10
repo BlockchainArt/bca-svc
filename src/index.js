@@ -1,4 +1,6 @@
+const cors = require("cors");
 const express = require("express");
+const jwt = require("express-jwt");
 const { body, validationResult } = require("express-validator");
 const { multihash } = require("is-ipfs");
 const morgan = require("morgan");
@@ -7,14 +9,16 @@ const multer = require("multer");
 const Chain = require("./chain");
 const { pinJsonString, pinFile } = require("./ipfs");
 
-const { FILE_STORE, SVC_NAME, SVC_PORT } = require("./config");
+const { FILE_STORE, SVC_KEY, SVC_NAME, SVC_PORT, UI_URL } = require("./config");
 
 main().catch(console.error);
 
 async function main() {
   const app = express();
+  app.use(cors({ origin: UI_URL }));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use(jwt({ secret: SVC_KEY, algorithms: ["HS256"] }));
   app.use(morgan("tiny"));
 
   const files = multer({ dest: FILE_STORE });
