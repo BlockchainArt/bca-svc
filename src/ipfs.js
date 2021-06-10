@@ -17,6 +17,6 @@ module.exports = {
     const add = await client.add(globSource(path));
     const cid = add.cid.toString();
     await client.pin.add(cid);
-    return cid;
+    return { path: add.path, cid, size: add.size };
   },
 };

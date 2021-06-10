@@ -53,8 +53,8 @@ async function main() {
     }
 
     try {
-      const cid = await pinFile(req.file.path);
-      res.json({ id: cid });
+      const { path, cid, size } = await pinFile(req.file.path);
+      res.json({ path, id: cid, size });
     } catch (err) {
       console.error(err);
       res.status(500).json({ errors: `${err}` });
