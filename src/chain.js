@@ -4,15 +4,16 @@ const { u8aToHex } = require("@polkadot/util");
 const { encodeDerivedAddress } = require("@polkadot/util-crypto");
 
 const { KSM_URL, KSM_KEY } = require("./config");
+const KSM_SS58_FMT = 2;
 
 module.exports = {
   addArtwork: async (galleryId, artistId, artwork) => {
     const { symbol, name, max, metadataUrl, url, type } = artwork;
 
-    const keyring = new Keyring({ type: "sr25519", ss58Format: 2 });
+    const keyring = new Keyring({ type: "sr25519", ss58Format: KSM_SS58_FMT });
     const key = keyring.createFromUri(KSM_KEY);
-    const galleryAddress = encodeDerivedAddress(key.address, galleryId, 2);
-    const artistAddress = encodeDerivedAddress(galleryAddress, artistId, 2);
+    const galleryAddress = encodeDerivedAddress(key.address, galleryId, KSM_SS58_FMT);
+    const artistAddress = encodeDerivedAddress(galleryAddress, artistId, KSM_SS58_FMT);
     const artistAddressHex = u8aToHex(artistAddress);
     const collectionId = `${artistAddressHex.slice(2, 10)}${artistAddressHex.slice(-8)}-${symbol}`;
 
@@ -74,9 +75,9 @@ module.exports = {
       })
     )}`;
 
-    const keyring = new Keyring({ type: "sr25519", ss58Format: 2 });
+    const keyring = new Keyring({ type: "sr25519", ss58Format: KSM_SS58_FMT });
     const key = keyring.createFromUri(KSM_KEY);
-    const galleryAddress = encodeDerivedAddress(key.address, galleryId, 2);
+    const galleryAddress = encodeDerivedAddress(key.address, galleryId, KSM_SS58_FMT);
 
     const api = await ApiPromise.create({ provider: new WsProvider(KSM_URL) });
     const mintCall = api.tx.system.remark(mintRmrk);
@@ -109,7 +110,7 @@ module.exports = {
     });
 
     const certificateId = `${mintedBlockNumber}-${collection}-${name}-${sn}`;
-    const collectorAddress = encodeDerivedAddress(galleryAddress, collectorId, 2);
+    const collectorAddress = encodeDerivedAddress(galleryAddress, collectorId, KSM_SS58_FMT);
     const sendRmrk = `RMRK::SEND::1.0.0::${certificateId}::${collectorAddress}`;
 
     const sendCall = api.tx.system.remark(sendRmrk);
@@ -137,10 +138,10 @@ module.exports = {
     });
   },
   sendCertificate: async (galleryId, ownerId, destId, certificateId) => {
-    const keyring = new Keyring({ type: "sr25519", ss58Format: 2 });
+    const keyring = new Keyring({ type: "sr25519", ss58Format: KSM_SS58_FMT });
     const key = keyring.createFromUri(KSM_KEY);
-    const galleryAddress = encodeDerivedAddress(key.address, galleryId, 2);
-    const collectorAddress = encodeDerivedAddress(galleryAddress, destId, 2);
+    const galleryAddress = encodeDerivedAddress(key.address, galleryId, KSM_SS58_FMT);
+    const collectorAddress = encodeDerivedAddress(galleryAddress, destId, KSM_SS58_FMT);
 
     const sendRmrk = `RMRK::SEND::1.0.0::${certificateId}::${collectorAddress}`;
 
