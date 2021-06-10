@@ -1,0 +1,232 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Blockchain.art IPFS & Kusama Service",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:6221"
+    }
+  ],
+  "paths": {
+    "/file": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "multipart/form-data:": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "file was pinned to IPFS node",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/artwork": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "galleryId": {
+                    "type": "number"
+                  },
+                  "artistId": {
+                    "type": "number"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "year": {
+                    "type": "number"
+                  },
+                  "numAp": {
+                    "type": "number"
+                  },
+                  "url": {
+                    "type": "string",
+                    "example": "ipfs://ipfs/Qmay5TKfaZESGSN7eK5644Di4CmFCWEpgBg88KoUxkQxfe"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "max": {
+                    "type": "number"
+                  },
+                  "symbol": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "example": "image/jpeg"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "metadata was pinned to IPFS node & on-chain asset class was created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "0106010301060103-ART"
+                    },
+                    "blockHash": {
+                      "type": "string",
+                      "format": "hex",
+                      "example": "0x4ca8431516f17aedb0f030688b9d1236bf225c0d063fc6cbf9d017452a1a25ce"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/certificate": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "galleryId": {
+                    "type": "number"
+                  },
+                  "artistId": {
+                    "type": "number"
+                  },
+                  "collectorId": {
+                    "type": "number"
+                  },
+                  "collection": {
+                    "type": "string",
+                    "example": "0106010301060103-ART"
+                  },
+                  "num": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "metadata was pinned to IPFS node & on-chain token was minted and sent to new owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "221-0106010301060103-ART-0106010301060103_ART_0000000000000001-0000000000000001"
+                    },
+                    "mintedBlock": {
+                      "type": "string",
+                      "format": "hex",
+                      "example": "0xf60a79f7e6b6ad4062eec59fc1397177f6ba9c444da1f1987646e125846a129e"
+                    },
+                    "sentBlock": {
+                      "type": "string",
+                      "format": "hex",
+                      "example": "0xf02fbba16a41b2a962bae7ebafea6d56e77a1b4929d4c036d5359198f7f0233e"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transfer": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "galleryId": {
+                    "type": "number"
+                  },
+                  "ownerId": {
+                    "type": "number"
+                  },
+                  "destId": {
+                    "type": "number"
+                  },
+                  "certificateId": {
+                    "type": "string",
+                    "example": "221-0106010301060103-ART-0106010301060103_ART_0000000000000001-0000000000000001"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "the token was transferred to the new owner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "blockHash": {
+                      "type": "string",
+                      "format": "hex",
+                      "example": "0x6938595bb355d4b15f332e140d201c3f61212d5cfc2474de60328f5645d0cb6d"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
