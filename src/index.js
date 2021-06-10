@@ -62,17 +62,23 @@ async function main() {
   });
 
   app.post(
-    "/artwork-metadata",
+    "/artwork",
+    body("galleryId").isInt(),
+    body("artistId").isInt(),
     body("description").isString(),
     body("year").isInt(),
     body("numAp").isInt(),
     body("url").custom(isValidIpfsUrl),
+    body("name").isString(),
+    body("max").isInt(),
+    body("symbol").isString().toUpperCase(),
+    body("type").isMimeType(),
     async (req, res) => {
       if (!validateRequest(req, res)) {
         return;
       }
 
-      const { description, year, numAp, url } = req.body;
+      const { galleryId, artistId, description, year, numAp, url, name, max, symbol, type } = req.body;
 
       const metadata = {
         description,
@@ -89,33 +95,8 @@ async function main() {
         image: url,
       };
 
-      try {
-        const cid = await pinJsonString(metadata);
-        res.json({ id: cid });
-      } catch (err) {
-        console.error(err);
-        res.status(500).json({ errors: `${err}` });
-      }
-    }
-  );
-
-  app.post(
-    "/artwork",
-    body("galleryId").isInt(),
-    body("artistId").isInt(),
-    body("name").isString(),
-    body("max").isInt(),
-    body("symbol").isString().toUpperCase(),
-    body("metadataUrl").custom(isValidIpfsUrl),
-    body("url").custom(isValidIpfsUrl),
-    body("type").isMimeType(),
-    async (req, res) => {
-      if (!validateRequest(req, res)) {
-        return;
-      }
-
-      const { galleryId, artistId, name, max, symbol, metadataUrl, url, type } = req.body;
-      const artwork = { name, max, symbol, metadataUrl, url, type };
+      const metadataCid = await pinJsonString(metadata);
+      const artwork = { name, max, symbol, metadataUrl: `ipfs://ipfs/${metadataCid}`, url, type };
 
       try {
         const { id, blockHash } = await chain.addArtwork(galleryId, artistId, artwork);
@@ -128,7 +109,10 @@ async function main() {
   );
 
   app.post(
-    "/certificate-metadata",
+    "/certificate",
+    body("galleryId").isInt(),
+    body("artistId").isInt(),
+    body("collectorId").isInt(),
     body("collection").isString(),
     body("num").isInt(),
     body("ap").toBoolean(),
@@ -137,7 +121,7 @@ async function main() {
         return;
       }
 
-      const { collection, num, ap } = req.body;
+      const { galleryId, artistId, collectorId, collection, num, ap, metadataUrl } = req.body;
       const name = `${collection}_${num.toString().padStart(16, "0")}`.replaceAll("-", "_");
 
       const metadata = {
@@ -154,32 +138,8 @@ async function main() {
         ],
       };
 
-      try {
-        const cid = await pinJsonString(metadata);
-        res.json({ id: cid });
-      } catch (err) {
-        console.error(err);
-        res.status(500).json({ errors: `${err}` });
-      }
-    }
-  );
-
-  app.post(
-    "/certificate",
-    body("galleryId").isInt(),
-    body("artistId").isInt(),
-    body("collectorId").isInt(),
-    body("collection").isString(),
-    body("num").isInt(),
-    body("ap").toBoolean(),
-    body("metadataUrl").custom(isValidIpfsUrl),
-    async (req, res) => {
-      if (!validateRequest(req, res)) {
-        return;
-      }
-
-      const { galleryId, artistId, collectorId, collection, num, ap, metadataUrl } = req.body;
-      const certificate = { collection, num, ap, metadataUrl };
+      const metadataCid = await pinJsonString(metadata);
+      const certificate = { collection, num, ap, metadataUrl: `ipfs://ipfs/${metadataCid}` };
 
       try {
         const { id, mintedBlock, sentBlock } = await chain.createCertificate(
