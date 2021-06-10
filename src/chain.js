@@ -65,9 +65,9 @@ class Chain {
           }
         }
 
-        if (status.isFinalized) {
+        if (status.isInBlock) {
           unsub();
-          resolve({ id: collectionId, blockHash: status.asFinalized });
+          resolve({ id: collectionId, blockHash: status.asInBlock });
         }
       });
     });
@@ -142,9 +142,9 @@ class Chain {
           }
         }
 
-        if (status.isFinalized) {
+        if (status.isInBlock) {
           unsub();
-          resolve({ id: certificateId, mintedBlockHash, sentBlock: status.asFinalized });
+          resolve({ id: certificateId, mintedBlockHash, sentBlock: status.asInBlock });
         }
       });
     });
@@ -173,9 +173,9 @@ class Chain {
           }
         }
 
-        if (status.isFinalized) {
+        if (status.isInBlock) {
           unsub();
-          resolve({ blockHash: status.asFinalized });
+          resolve({ blockHash: status.asInBlock });
         }
       });
     });
