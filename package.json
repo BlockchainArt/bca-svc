@@ -1,7 +1,7 @@
 {
   "name": "bca-ksm-svc",
   "version": "1.0.0",
-  "description": "Blockchain.art Kusama Service",
+  "description": "Blockchain.art IPFS & Kusama Service",
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon ./src/index.js",

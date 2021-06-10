@@ -7,7 +7,7 @@ const multer = require("multer");
 const Chain = require("./chain");
 const { pinJsonString, pinFile } = require("./ipfs");
 
-const { APP_NAME, FILE_STORE, SVC_PORT } = require("./config");
+const { FILE_STORE, SVC_NAME, SVC_PORT } = require("./config");
 
 main().catch(console.error);
 
@@ -196,23 +196,30 @@ async function main() {
     }
   );
 
-  app.post("/transfer", async (req, res) => {
-    if (!validateRequest(req, res)) {
-      return;
-    }
+  app.post(
+    "/transfer",
+    body("galleryId").isInt(),
+    body("ownerId").isInt(),
+    body("destId").isInt(),
+    body("certificateId").isString(),
+    async (req, res) => {
+      if (!validateRequest(req, res)) {
+        return;
+      }
 
-    const { galleryId, ownerId, destId, certificateId } = req.body;
+      const { galleryId, ownerId, destId, certificateId } = req.body;
 
-    try {
-      const { blockHash } = await chain.sendCertificate(galleryId, ownerId, destId, certificateId);
-      res.json({ blockHash });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ errors: `${err}` });
+      try {
+        const { blockHash } = await chain.sendCertificate(galleryId, ownerId, destId, certificateId);
+        res.json({ blockHash });
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ errors: `${err}` });
+      }
     }
-  });
+  );
 
   app.listen(SVC_PORT, () => {
-    console.log(` >>> ✅ ${APP_NAME} is running on port ${SVC_PORT}...`);
+    console.log(` >>> ✅ ${SVC_NAME} is running on port ${SVC_PORT}...`);
   });
 }
