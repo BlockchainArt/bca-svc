@@ -1,4 +1,3 @@
-const serverless = require('serverless-http');
 const express = require("express");
 const { body, validationResult } = require("express-validator");
 const { multihash } = require("is-ipfs");
@@ -184,4 +183,3 @@ async function main() {
     console.log(` >>> ✅ ${SVC_NAME} is running on port ${SVC_PORT}...`);
   });
 }
-module.exports.handler = serverless(app);
