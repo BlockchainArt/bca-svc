@@ -1,12 +1,27 @@
 # serverless.yml
 
 service: bca-svc
+plugins:
+  - serverless-stage-manager
+  - serverless-offline
+frameworkVersion: '2'
 
 provider:
   name: aws
   runtime: nodejs14.x
-  stage: dev
-  region: us-east-1
+  stage: ${opt:stage,'development'}
+  timeout: 29
+  tracing:
+    lambda: true
+  httpApi:
+    cors: true
+    metrics: true
+  logs:
+    httpApi: true
+  environment:
+    BCA_IPFS_URL: ${self:custom.BCA_IPFS_URL.${self:provider.stage}}
+    BCA_KSM_URL: ${self:custom.BCA_KSM_URL.${self:provider.stage}}
+    BCA_KSM_KEY: ${self:custom.BCA_KSM_KEY.${self:provider.stage}}
 
 functions:
   app:
@@ -15,3 +30,24 @@ functions:
       - httpApi:
           path: "/{any+}"
           method: "*"
+custom:
+  stages:
+    - local
+    - development
+    - staging
+    - production
+  BCA_IPFS_URL:
+    local: "http://localhost:5001"
+    development: "https://ipfs-development.blockchain.art"
+    staging: "https://ipfs-staging.blockchain.art"
+    production: "https://ipfs.blockchain.art"
+  BCA_KSM_URL:
+    local: "ws://127.0.0.1:9944"
+    development: "wss://kusama.do.blockchain.art"
+    staging: "wss://kusama.do.blockchain.art"
+    production: "wss://kusama.do.blockchain.art"
+  BCA_KSM_KEY:
+    local: "//Alice"
+    development: ${ssm:development-ksm-key}
+    staging: ${ssm:staging-ksm-key}
+    production: ${ssm:production-ksm-key}
