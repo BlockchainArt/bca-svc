@@ -65,7 +65,7 @@ async function main() {
 
   app.post(
     "/artwork",
-    body("galleryId").isInt(),
+    body("galleryId").isInt({ max: 65534 }),
     body("artistId").isInt(),
     body("description").isString(),
     body("year").isInt(),
@@ -112,7 +112,7 @@ async function main() {
 
   app.post(
     "/certificate",
-    body("galleryId").isInt(),
+    body("galleryId").isInt({ max: 65534 }),
     body("artistId").isInt(),
     body("collectorId").isInt(),
     body("collection").isString(),
@@ -160,7 +160,6 @@ async function main() {
 
   app.post(
     "/transfer",
-    body("galleryId").isInt(),
     body("ownerId").isInt(),
     body("destId").isInt(),
     body("certificateId").isString(),
@@ -169,10 +168,10 @@ async function main() {
         return;
       }
 
-      const { galleryId, ownerId, destId, certificateId } = req.body;
+      const { ownerId, destId, certificateId } = req.body;
 
       try {
-        const { blockHash } = await chain.sendCertificate(galleryId, ownerId, destId, certificateId);
+        const { blockHash } = await chain.sendCertificate(ownerId, destId, certificateId);
         res.json({ blockHash });
       } catch (err) {
         console.error(err);
