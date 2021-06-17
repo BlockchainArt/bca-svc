@@ -6,7 +6,7 @@ const morgan = require("morgan");
 const multer = require("multer");
 
 const Chain = require("./chain");
-const { pinJsonString, pinFile } = require("./ipfs");
+const { pinJsonString, pinFile, pinFileBatch } = require("./ipfs");
 
 const { FILE_STORE, SVC_NAME, SVC_PORT, UI_URL } = require("./config");
 
@@ -56,6 +56,29 @@ async function main() {
 
     try {
       const { path, cid, size } = await pinFile(req.file.path);
+      res.json({ path, id: cid, size });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ errors: `${err}` });
+    }
+  });
+
+  app.post("/file-batch", files.array("file"), async (req, res) => {
+    if (!Array.isArray(req.files) || req.files.length < 1 || !req.files.some((file) => typeof file.path === "string")) {
+      res.status(400).json({ errors: "File batch not found." });
+      return;
+    }
+
+    const filePaths = req.files.map((file) => {
+      if (typeof file.path !== "string") {
+        return;
+      }
+
+      return file.path;
+    });
+
+    try {
+      const { path, cid, size } = await pinFileBatch(filePaths);
       res.json({ path, id: cid, size });
     } catch (err) {
       console.error(err);
