@@ -8,13 +8,13 @@ const multer = require("multer");
 const Chain = require("./chain");
 const { pinJsonString, pinFile } = require("./ipfs");
 
-const { FILE_STORE, SVC_NAME, SVC_PORT, UI_URL } = require("./config");
+const { CORS_HEADERS, FILE_STORE, SVC_NAME, SVC_PORT, UI_URL } = require("./config");
 
 main().catch(console.error);
 
 async function main() {
   const app = express();
-  app.use(cors({ origin: UI_URL }));
+  app.use(cors({ allowedHeaders: CORS_HEADERS, origin: UI_URL }));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(morgan("tiny"));
