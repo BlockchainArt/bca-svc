@@ -5,6 +5,7 @@ const { encodeDerivedAddress } = require("@polkadot/util-crypto");
 
 const { KSM_URL, KSM_KEY } = require("./config");
 const KSM_SS58_FMT = 2;
+const COLLECTOR_IDX = 65535;
 
 class Chain {
   #key;
@@ -122,7 +123,8 @@ class Chain {
     });
 
     const certificateId = `${mintedBlockNumber}-${collection}-${name}-${sn}`;
-    const collectorAddress = encodeDerivedAddress(galleryAddress, collectorId, KSM_SS58_FMT);
+    const collectorWallet = encodeDerivedAddress(this.#key.address, COLLECTOR_IDX, KSM_SS58_FMT);
+    const collectorAddress = encodeDerivedAddress(collectorWallet, collectorId, KSM_SS58_FMT);
     const sendRmrk = `RMRK::SEND::1.0.0::${certificateId}::${collectorAddress}`;
 
     const sendCall = this.#api.tx.system.remark(sendRmrk);
@@ -150,15 +152,15 @@ class Chain {
     });
   }
 
-  async sendCertificate(galleryId, ownerId, destId, certificateId) {
-    const galleryAddress = encodeDerivedAddress(this.#key.address, galleryId, KSM_SS58_FMT);
-    const collectorAddress = encodeDerivedAddress(galleryAddress, destId, KSM_SS58_FMT);
+  async sendCertificate(ownerId, destId, certificateId) {
+    const collectorWallet = encodeDerivedAddress(this.#key.address, COLLECTOR_IDX, KSM_SS58_FMT);
+    const collectorAddress = encodeDerivedAddress(collectorWallet, destId, KSM_SS58_FMT);
 
     const sendRmrk = `RMRK::SEND::1.0.0::${certificateId}::${collectorAddress}`;
 
     const sendCall = this.#api.tx.system.remark(sendRmrk);
     const asOwnerSend = this.#api.tx.utility.asDerivative(ownerId, sendCall);
-    const asGallerySend = this.#api.tx.utility.asDerivative(galleryId, asOwnerSend);
+    const asGallerySend = this.#api.tx.utility.asDerivative(COLLECTOR_IDX, asOwnerSend);
     return new Promise(async (resolve, reject) => {
       const unsub = await asGallerySend.signAndSend(this.#key, ({ status, events, dispatchError }) => {
         if (dispatchError) {
