@@ -45,6 +45,30 @@ Returns example:
 }
 ```
 
+### `POST /file-batch`
+
+Pin a batch of files to the IPFS server. This endpoint can be used any time a batch of files needs to be uploaded.
+
+Parameters:
+
+- `file`: the file to pin to the IPFS server (form-encoded, can repeat)
+
+Returns:
+
+- `path`: IPFS path (string)
+- `id`: IPFS CID, file will be available at `https://bca-ipfs.blockchain.art/ipfs/<id>` (string)
+- `size`: file size (integer)
+
+Returns example:
+
+```json
+{
+  "path": "9b089d899503e43e1c8aec600f96fed6",
+  "id": "QmPZdcc9dT85hdx6E2uMxULMwwHDHrJR2ayMUHUamaXo1N",
+  "size": 16936
+}
+```
+
 ### `POST /artwork`
 
 Pin artwork metadata to the IPFS server & create an on-chain asset class for minting prints. This endpoint should be

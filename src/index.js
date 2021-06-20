@@ -1,3 +1,4 @@
+const cors = require("cors");
 const express = require("express");
 const { body, validationResult } = require("express-validator");
 const { multihash } = require("is-ipfs");
@@ -5,14 +6,15 @@ const morgan = require("morgan");
 const multer = require("multer");
 
 const Chain = require("./chain");
-const { pinJsonString, pinFile } = require("./ipfs");
+const { pinJsonString, pinFile, pinFileBatch } = require("./ipfs");
 
-const { FILE_STORE, SVC_NAME, SVC_PORT } = require("./config");
+const { CORS_HEADERS, FILE_STORE, SVC_NAME, SVC_PORT, UI_URL } = require("./config");
 
 main().catch(console.error);
 
 async function main() {
   const app = express();
+  app.use(cors({ allowedHeaders: CORS_HEADERS, origin: UI_URL }));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(morgan("tiny"));
@@ -61,9 +63,32 @@ async function main() {
     }
   });
 
+  app.post("/file-batch", files.array("file"), async (req, res) => {
+    if (!Array.isArray(req.files) || req.files.length < 1 || !req.files.some((file) => typeof file.path === "string")) {
+      res.status(400).json({ errors: "File batch not found." });
+      return;
+    }
+
+    const filePaths = req.files.map((file) => {
+      if (typeof file.path !== "string") {
+        return;
+      }
+
+      return file.path;
+    });
+
+    try {
+      const { path, cid, size } = await pinFileBatch(filePaths);
+      res.json({ path, id: cid, size });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ errors: `${err}` });
+    }
+  });
+
   app.post(
     "/artwork",
-    body("galleryId").isInt(),
+    body("galleryId").isInt({ max: 65534 }),
     body("artistId").isInt(),
     body("description").isString(),
     body("year").isInt(),
@@ -110,7 +135,7 @@ async function main() {
 
   app.post(
     "/certificate",
-    body("galleryId").isInt(),
+    body("galleryId").isInt({ max: 65534 }),
     body("artistId").isInt(),
     body("collectorId").isInt(),
     body("collection").isString(),
@@ -158,7 +183,6 @@ async function main() {
 
   app.post(
     "/transfer",
-    body("galleryId").isInt(),
     body("ownerId").isInt(),
     body("destId").isInt(),
     body("certificateId").isString(),
@@ -167,10 +191,10 @@ async function main() {
         return;
       }
 
-      const { galleryId, ownerId, destId, certificateId } = req.body;
+      const { ownerId, destId, certificateId } = req.body;
 
       try {
-        const { blockHash } = await chain.sendCertificate(galleryId, ownerId, destId, certificateId);
+        const { blockHash } = await chain.sendCertificate(ownerId, destId, certificateId);
         res.json({ blockHash });
       } catch (err) {
         console.error(err);

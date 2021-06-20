@@ -52,6 +52,49 @@
         }
       }
     },
+    "/file-batch": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "multipart/form-data:": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "uniqueItems": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "files were pinned to IPFS node",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "size": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/artwork": {
       "post": {
         "requestBody": {
