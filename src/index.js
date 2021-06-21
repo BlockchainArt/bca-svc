@@ -4,6 +4,8 @@ const { body, validationResult } = require("express-validator");
 const { multihash } = require("is-ipfs");
 const morgan = require("morgan");
 const multer = require("multer");
+const Sentry = require('@sentry/node');
+const Tracing = require("@sentry/tracing");
 
 const Chain = require("./chain");
 const { pinJsonString, pinFile, pinFileBatch } = require("./ipfs");
@@ -20,6 +22,27 @@ async function main() {
   app.use(morgan("tiny"));
 
   const files = multer({ dest: FILE_STORE });
+
+  Sentry.init({
+    dsn: "https://fcbd647f32c445e6ae0c5880c2f4d3a1@error.kalvad.com/16",
+    integrations: [
+      // enable HTTP calls tracing
+      new Sentry.Integrations.Http({ tracing: true }),
+      // enable Express.js middleware tracing
+      new Tracing.Integrations.Express({ app }),
+    ],
+
+    // Set tracesSampleRate to 1.0 to capture 100%
+    // of transactions for performance monitoring.
+    // We recommend adjusting this value in production
+    tracesSampleRate: 1.0,
+  });
+
+  // RequestHandler creates a separate execution context using domains, so that every
+  // transaction/span/breadcrumb is attached to its own Hub instance
+  app.use(Sentry.Handlers.requestHandler());
+  // TracingHandler creates a trace for every incoming request
+  app.use(Sentry.Handlers.tracingHandler());
 
   const chain = await new Chain().initialized;
 
@@ -202,6 +225,9 @@ async function main() {
       }
     }
   );
+
+  // The error handler must be before any other error middleware and after all controllers
+  app.use(Sentry.Handlers.errorHandler());
 
   app.listen(SVC_PORT, () => {
     console.log(` >>> ✅ ${SVC_NAME} is running on port ${SVC_PORT}...`);
