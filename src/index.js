@@ -82,7 +82,7 @@ async function main() {
       res.json({ path, id: cid, size });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ errors: `${err}` });
+      res.status(500).json({ errors: `${err.details}` });
     }
   });
 
@@ -105,7 +105,7 @@ async function main() {
       res.json({ path, id: cid, size });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ errors: `${err}` });
+      res.status(500).json({ errors: `${err.details}` });
     }
   });
 
@@ -143,7 +143,14 @@ async function main() {
         image: url,
       };
 
-      const metadataCid = await pinJsonString(metadata);
+      let metadataCid;
+      try {
+        metadataCid = await pinJsonString(metadata);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ errors: `${err.details}` });
+      }
+
       const artwork = { name, max, symbol, metadataUrl: `ipfs://ipfs/${metadataCid}`, url, type };
 
       try {

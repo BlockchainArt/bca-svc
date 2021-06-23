@@ -9,7 +9,8 @@ This project depends on the following environment variables:
 
 - `BCA_SVC_NAME`: Service name (default: `Blockchain.art IPFS & Kusama Service`)
 - `BCA_SVC_PORT`: Port on which to run the service (default: `6221`)
-- `BCA_IPFS_URL`: URL for the IPFS HTTP API (default: `http://localhost:5001`)
+- `BCA_IPFS_KEY`: Pinata API key
+- `BCA_IPFS_PWD`: Pinata API secret
 - `BCA_KSM_URL`: URL for the Kusama WebSocket API (default: `ws://127.0.0.1:9944`)
 - `BCA_KSM_KEY`: Private key to use for blockchain interactions (default: `//Alice`)
 - `BCA_FILE_STORE`: Temporary [location for files uploaded](https://www.npmjs.com/package/multer#multeropts) via
@@ -31,7 +32,6 @@ Parameters:
 
 Returns:
 
-- `path`: IPFS path (string)
 - `id`: IPFS CID, file will be available at `https://bca-ipfs.blockchain.art/ipfs/<id>` (string)
 - `size`: file size (integer)
 
@@ -39,7 +39,6 @@ Returns example:
 
 ```json
 {
-  "path": "9b089d899503e43e1c8aec600f96fed6",
   "id": "QmPZdcc9dT85hdx6E2uMxULMwwHDHrJR2ayMUHUamaXo1N",
   "size": 16936
 }
@@ -55,7 +54,6 @@ Parameters:
 
 Returns:
 
-- `path`: IPFS path (string)
 - `id`: IPFS CID, file will be available at `https://bca-ipfs.blockchain.art/ipfs/<id>` (string)
 - `size`: file size (integer)
 
@@ -63,7 +61,6 @@ Returns example:
 
 ```json
 {
-  "path": "9b089d899503e43e1c8aec600f96fed6",
   "id": "QmPZdcc9dT85hdx6E2uMxULMwwHDHrJR2ayMUHUamaXo1N",
   "size": 16936
 }

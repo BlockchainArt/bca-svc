@@ -35,9 +35,6 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "path": {
-                      "type": "string"
-                    },
                     "id": {
                       "type": "string"
                     },
@@ -78,9 +75,6 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "path": {
-                      "type": "string"
-                    },
                     "id": {
                       "type": "string"
                     },
