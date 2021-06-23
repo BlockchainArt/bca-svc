@@ -15,6 +15,7 @@ module.exports = {
   pinFile: async (path) => {
     const pinata = pinataSDK(IPFS_KEY, IPFS_PWD);
     const result = await pinata.pinFromFS(path);
+    fs.rmSync(path);
     return { cid: result.IpfsHash, size: result.PinSize };
   },
   pinFileBatch: async (paths) => {
@@ -26,7 +27,7 @@ module.exports = {
         return;
       }
 
-      fs.copyFileSync(filePath, path.join(tmpPath, parsedPath.name));
+      fs.renameSync(filePath, path.join(tmpPath, parsedPath.name));
     });
 
     const pinata = pinataSDK(IPFS_KEY, IPFS_PWD);
