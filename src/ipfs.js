@@ -2,26 +2,21 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 
-const { create, globSource } = require("ipfs-http-client");
+const pinataSDK = require("@pinata/sdk");
 
-const { FILE_STORE, IPFS_URL } = require("./config");
-
-nativeFetch = require("node-fetch");
+const { FILE_STORE, IPFS_KEY, IPFS_PWD } = require("./config");
 
 module.exports = {
   pinJsonString: async (data) => {
-    const client = create(IPFS_URL);
-    const add = await client.add(JSON.stringify(data));
-    const cid = add.cid.toString();
-    await client.pin.add(cid);
-    return cid;
+    const pinata = pinataSDK(IPFS_KEY, IPFS_PWD);
+    const result = await pinata.pinJSONToIPFS(data);
+    return result.IpfsHash;
   },
   pinFile: async (path) => {
-    const client = create(IPFS_URL);
-    const add = await client.add(globSource(path));
-    const cid = add.cid.toString();
-    await client.pin.add(cid);
-    return { path: add.path, cid, size: add.size };
+    const pinata = pinataSDK(IPFS_KEY, IPFS_PWD);
+    const result = await pinata.pinFromFS(path);
+    fs.rmSync(path);
+    return { cid: result.IpfsHash, size: result.PinSize };
   },
   pinFileBatch: async (paths) => {
     const tmpPath = path.join(FILE_STORE, crypto.randomUUID());
@@ -32,14 +27,12 @@ module.exports = {
         return;
       }
 
-      fs.copyFileSync(filePath, path.join(tmpPath, parsedPath.name));
+      fs.renameSync(filePath, path.join(tmpPath, parsedPath.name));
     });
 
-    const client = create(IPFS_URL);
-    const add = await client.add(globSource(tmpPath, { recursive: true }));
+    const pinata = pinataSDK(IPFS_KEY, IPFS_PWD);
+    const result = await pinata.pinFromFS(tmpPath);
     fs.rmSync(tmpPath, { recursive: true });
-    const cid = add.cid.toString();
-    await client.pin.add(cid);
-    return { path: add.path, cid, size: add.size };
+    return { cid: result.IpfsHash, size: result.PinSize };
   },
 };
