@@ -119,6 +119,9 @@
                   "name": {
                     "type": "string"
                   },
+                  "artist": {
+                    "type": "string"
+                  },
                   "max": {
                     "type": "number"
                   },

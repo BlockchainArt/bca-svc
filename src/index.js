@@ -4,7 +4,7 @@ const { body, validationResult } = require("express-validator");
 const { multihash } = require("is-ipfs");
 const morgan = require("morgan");
 const multer = require("multer");
-const Sentry = require('@sentry/node');
+const Sentry = require("@sentry/node");
 const Tracing = require("@sentry/tracing");
 
 const Chain = require("./chain");
@@ -118,6 +118,7 @@ async function main() {
     body("numAp").isInt(),
     body("url").custom(isValidIpfsUrl),
     body("name").isString(),
+    body("artist").isString(),
     body("max").isInt(),
     body("symbol").isString().toUpperCase(),
     body("type").isMimeType(),
@@ -126,10 +127,11 @@ async function main() {
         return;
       }
 
-      const { galleryId, artistId, description, year, numAp, url, name, max, symbol, type } = req.body;
+      const { galleryId, artistId, description, year, numAp, url, name, artist, max, symbol, type } = req.body;
 
       const metadata = {
         description,
+        artist,
         attributes: [
           {
             trait_type: "Year",
