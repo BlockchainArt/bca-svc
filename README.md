@@ -82,6 +82,7 @@ Parameters:
 - `url`: IPFS URL of the original artwork (string)
   - regex: ipfs://ipfs/&lt;cid&gt;
 - `name`: artwork name (alphanumeric string)
+- `artist`: artist name (alphanumeric string)
 - `max`: max number of total (prints + APs) certificates (integer)
 - `symbol`: artwork symbol (string)
 - `type`: artwork type (MIME type)
@@ -97,6 +98,7 @@ Example:
   "numAp": 1,
   "url": "ipfs://ipfs/Qmay5TKfaZESGSN7eK5644Di4CmFCWEpgBg88KoUxkQxfe",
   "name": "Mona Lisa",
+  "artist": "Leondardo Da Vinci",
   "max": 4,
   "symbol": "LSA",
   "type": "image/jpeg"

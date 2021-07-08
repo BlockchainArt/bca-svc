@@ -3,7 +3,8 @@ require("dotenv").config();
 module.exports = {
   SVC_NAME: process.env.BCA_SVC_NAME || "Blockchain.art IPFS & Kusama Service",
   SVC_PORT: process.env.BCA_SVC_PORT ? parseInt(process.env.BCA_SVC_PORT) : 6221,
-  CORS_HEADERS: process.env.BCA_CORS_HEADERS || "Access-Control-Allow-Headers,Origin,X-Requested-With,Content-Type,Accept",
+  CORS_HEADERS:
+    process.env.BCA_CORS_HEADERS || "Access-Control-Allow-Headers,Origin,X-Requested-With,Content-Type,Accept",
   UI_URL: process.env.BCA_UI_URL || "localhost:3000",
   IPFS_KEY: process.env.BCA_IPFS_KEY || "api-key",
   IPFS_PWD: process.env.BCA_IPFS_PWD || "api-secret",
